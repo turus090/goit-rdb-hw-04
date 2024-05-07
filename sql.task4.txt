@@ -1,0 +1,264 @@
+task 1
+ Створення схеми "libraryManagement"
+CREATE SCHEMA IF NOT EXISTS libraryManagement;
+
+ Створення таблиці "authors"
+CREATE TABLE IF NOT EXISTS libraryManagement.authors (
+    author_id INT AUTO_INCREMENT PRIMARY KEY,
+    author_name VARCHAR(255)
+);
+
+ Створення таблиці "genres"
+CREATE TABLE IF NOT EXISTS libraryManagement.genres (
+    genre_id INT AUTO_INCREMENT PRIMARY KEY,
+    genre_name VARCHAR(255)
+);
+
+ Створення таблиці "books"
+CREATE TABLE IF NOT EXISTS libraryManagement.books (
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    publication_year YEAR,
+    author_id INT,
+    genre_id INT,
+    FOREIGN KEY (author_id) REFERENCES libraryManagement.authors(author_id),
+    FOREIGN KEY (genre_id) REFERENCES libraryManagement.genres(genre_id)
+);
+
+ Створення таблиці "users"
+CREATE TABLE IF NOT EXISTS libraryManagement.users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255),
+    email VARCHAR(255)
+);
+
+ Створення таблиці "borrowed_books"
+CREATE TABLE IF NOT EXISTS libraryManagement.borrowed_books (
+    borrow_id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT,
+    user_id INT,
+    borrow_date DATE,
+    return_date DATE,
+    FOREIGN KEY (book_id) REFERENCES libraryManagement.books(book_id),
+    FOREIGN KEY (user_id) REFERENCES libraryManagement.users(user_id)
+);
+
+_____________________________________________________________________
+
+task 2
+
+
+Додавання даних до таблиці 
+INSERT INTO libraryManagement.authors (author_name) VALUES 
+    ('Stephen King'),
+    ('J.K. Rowling');
+
+
+INSERT INTO libraryManagement.genres (genre_name) VALUES 
+    ('Horror'),
+    ('Fantasy');
+
+
+INSERT INTO libraryManagement.books (title, publication_year, author_id, genre_id) VALUES 
+    ('It', 1986, 1, 1),
+    ('Harry Potter and the Philosopher''s Stone', 1997, 2, 2);
+
+
+INSERT INTO libraryManagement.users (username, email) VALUES 
+    ('JohnDoe', 'john.doe@example.com'),
+    ('JaneSmith', 'jane.smith@example.com');
+
+
+INSERT INTO libraryManagement.borrowed_books (book_id, user_id, borrow_date, return_date) VALUES 
+    (1, 1, '2024-04-30', '2024-05-14'),
+    (2, 2, '2024-05-01', NULL);
+
+
+______________________________________
+
+task 3
+
+USE mydb;
+
+SELECT od.id,
+       od.quantity,
+       orders.id AS order_id,
+       orders.date,
+       customers.id AS customer_id,
+       customers.name,
+       customers.contact,
+       customers.address,
+       customers.city,
+       customers.postal_code,
+       customers.country,
+       products.id AS product_id,
+       products.name,
+       products.unit,
+       products.price,
+       products.supplier_id,
+       products.category_id,
+       categories.name,
+       categories.description,
+       employees.employee_id,
+       employees.last_name,
+       employees.first_name,
+       employees.birthdate,
+       employees.photo,
+       employees.notes,
+       shippers.id AS shippers_id,
+       shippers.name,
+       shippers.phone,
+       suppliers.id AS supplier_id,
+       suppliers.name,
+       suppliers.contact,
+       suppliers.address,
+       suppliers.city,
+       suppliers.postal_code,
+       suppliers.country,
+       suppliers.phone
+FROM order_details AS od
+INNER JOIN orders ON od.order_id = orders.id
+INNER JOIN customers ON orders.customer_id = customers.id
+INNER JOIN products ON od.product_id = products.id
+INNER JOIN categories ON products.category_id = categories.id
+INNER JOIN employees ON orders.employee_id = employees.employee_id
+INNER JOIN shippers ON orders.shipper_id = shippers.id
+INNER JOIN suppliers ON products.supplier_id = suppliers.id
+
+Такий запит дасть нам всі можливі колонки з усіх таблиць. Уникаючи дублів та зі структурованою системою. Всі колонки з однаковими назвами перейменовані для більшого розуміння. Також, для більш короткого запити який міститиме лише відповідні id, може зробити наступний запит
+
+SELECT od.*,
+       o.id AS order_id,
+       c.id AS customer_id,
+       p.id AS product_id,
+       cat.id AS category_id,
+       e.employee_id,
+       s.id AS shipper_id,
+       sup.id AS supplier_id
+FROM order_details AS od
+INNER JOIN orders AS o ON od.order_id = o.id
+INNER JOIN customers AS c ON o.customer_id = c.id
+INNER JOIN products AS p ON od.product_id = p.id
+INNER JOIN categories AS cat ON p.category_id = cat.id
+INNER JOIN employees AS e ON o.employee_id = e.employee_id
+INNER JOIN shippers AS s ON o.shipper_id = s.id
+INNER JOIN suppliers AS sup ON p.supplier_id = sup.id;
+
+
+_________________________________________________________
+
+task 4
+
+4.1
+Визначте, скільки рядків ви отримали (за допомогою оператора COUNT).
+SELECT COUNT(*) AS row_count
+FROM order_details AS od
+INNER JOIN orders AS o ON od.order_id = o.id
+INNER JOIN customers AS c ON o.customer_id = c.id
+INNER JOIN products AS p ON od.product_id = p.id
+INNER JOIN categories AS cat ON p.category_id = cat.id
+INNER JOIN employees AS e ON o.employee_id = e.employee_id
+INNER JOIN shippers AS s ON o.shipper_id = s.id
+INNER JOIN suppliers AS sup ON p.supplier_id = sup.id;
+
+
+4.2
+
+Для зміни деяких операторів INNER JOIN на LEFT або RIGHT JOIN потрібно розуміти, як це вплине на результат запиту. Відмінність між цими типами з'єднань полягає в обробці рядків, які не мають відповідності в іншій таблиці.
+
+При INNER JOIN в результуючому наборі даних будуть лише ті рядки, які мають відповідні значення у всіх з'єднаних таблицях. Однак при LEFT JOIN усі рядки з лівої таблиці (тобто першої в списку) будуть включені в результат, навіть якщо вони не мають відповідності в правій таблиці. Аналогічно, при RIGHT JOIN всі рядки з правої таблиці (останньої в списку) будуть включені, навіть якщо вони не мають відповідності в лівій таблиці.
+
+Якщо змінити декілька операторів INNER JOIN на LEFT або RIGHT JOIN у запиті, це може призвести до зміни кількості рядків у результаті запиту. Наприклад, якщо в таблиці зліва є рядки, які не мають відповідностей у таблиці справа, то вони також будуть включені до результату при LEFT JOIN, але не будуть включені при INNER JOIN.
+
+Виконаємо запит
+
+SELECT COUNT(*) AS total_rows
+       
+SELECT COUNT(*) AS row_count
+FROM order_details AS od
+LEFT JOIN orders AS o ON od.order_id = o.id
+LEFT JOIN customers AS c ON o.customer_id = c.id
+LEFT JOIN products AS p ON od.product_id = p.id
+LEFT JOIN categories AS cat ON p.category_id = cat.id
+LEFT JOIN employees AS e ON o.employee_id = e.employee_id
+LEFT JOIN shippers AS s ON o.shipper_id = s.id
+LEFT JOIN suppliers AS sup ON p.supplier_id = sup.id;
+
+
+І отримаємо все тіж 518 строк, що говорить нам про те, що в нашому випадку, оператори INNER, LEFT та RIGHT JOIN не впливають на кількість рядків, які повертаються, оскільки кількість рядків визначається в основному наборі даних, який вибирається, і не змінюється в залежності від типу з'єднання з іншими таблицями.
+
+4.3
+
+SELECT *
+FROM order_details AS od
+INNER JOIN orders AS o ON od.order_id = o.id
+INNER JOIN employees AS e ON o.employee_id = e.employee_id
+WHERE e.employee_id > 3 AND e.employee_id <= 10;
+
+
+total_rows = 317
+
+4.4
+
+Згрупуйте за іменем категорії, порахуйте кількість рядків у групі, середню кількість товару.
+SELECT cat.name AS category_name,
+       COUNT(*) AS row_count,
+       AVG(od.quantity) AS average_quantity
+FROM order_details AS od
+INNER JOIN products AS p ON od.product_id = p.id
+INNER JOIN categories AS cat ON p.category_id = cat.id
+GROUP BY cat.name;
+
+
+4.5
+Відфільтруйте рядки, де середня кількість товару більша за 21.
+SELECT categories.name AS category_name,
+       COUNT(*) AS total_rows,
+       AVG(od.quantity) AS average_quantity
+FROM order_details AS od
+INNER JOIN orders ON od.order_id = orders.id
+INNER JOIN customers ON orders.customer_id = customers.id
+INNER JOIN products ON od.product_id = products.id
+INNER JOIN categories ON products.category_id = categories.id
+INNER JOIN employees ON orders.employee_id = employees.employee_id
+INNER JOIN shippers ON orders.shipper_id = shippers.id
+INNER JOIN suppliers ON products.supplier_id = suppliers.id
+GROUP BY category_name
+HAVING average_quantity > 21
+
+Всі рядки відповідають умові
+
+4.6
+SELECT categories.name AS category_name,
+       COUNT(*) AS total_rows,
+       AVG(od.quantity) AS average_quantity
+FROM order_details AS od
+INNER JOIN orders ON od.order_id = orders.id
+INNER JOIN customers ON orders.customer_id = customers.id
+INNER JOIN products ON od.product_id = products.id
+INNER JOIN categories ON products.category_id = categories.id
+INNER JOIN employees ON orders.employee_id = employees.employee_id
+INNER JOIN shippers ON orders.shipper_id = shippers.id
+INNER JOIN suppliers ON products.supplier_id = suppliers.id
+GROUP BY category_name
+HAVING average_quantity > 21
+ORDER BY total_rows DESC
+
+4.7
+SELECT categories.name AS category_name,
+       COUNT(*) AS total_rows,
+       AVG(od.quantity) AS average_quantity
+FROM order_details AS od
+INNER JOIN orders ON od.order_id = orders.id
+INNER JOIN customers ON orders.customer_id = customers.id
+INNER JOIN products ON od.product_id = products.id
+INNER JOIN categories ON products.category_id = categories.id
+INNER JOIN employees ON orders.employee_id = employees.employee_id
+INNER JOIN shippers ON orders.shipper_id = shippers.id
+INNER JOIN suppliers ON products.supplier_id = suppliers.id
+GROUP BY category_name
+HAVING average_quantity > 21
+ORDER BY total_rows DESC
+LIMIT 4
+OFFSET 1
+
